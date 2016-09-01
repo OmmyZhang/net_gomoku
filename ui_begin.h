@@ -61,7 +61,7 @@ public:
         label_3->setGeometry(QRect(23, 10, 71, 18));
         for_server = new QGroupBox(Begin);
         for_server->setObjectName(QStringLiteral("for_server"));
-        for_server->setGeometry(QRect(10, 10, 261, 121));
+        for_server->setGeometry(QRect(10, 10, 250, 121));
         waiting = new QLabel(for_server);
         waiting->setObjectName(QStringLiteral("waiting"));
         waiting->setEnabled(true);
