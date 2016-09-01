@@ -27,16 +27,24 @@ void MainBody::recv()
     
     if(my_turn)
     {
+        int i = (int)data[0];
+        int j = (int)data[1];
+        status[i][j] = 1 + is_black;
+        my_turn = 1;
     }
     else
     {
         is_black = (int)data[0] ^ 1;
         pre();
     }
+    update();
 }
 
 void MainBody::game_start(bool isServer ,QTcpSocket* _socket)
 {
+    for(int i=1;i<=15;++i)
+        for(int j=1;j<=15;++j)
+            status[i][j]=0;
     show();
     socket = _socket;
     is_server = isServer;
@@ -57,13 +65,25 @@ void MainBody::pre()
 {
     setWindowTitle(QString( is_black?"Black, ":"White, ") + QString(is_server?"Server":"Client"));
     my_turn = 2 - is_black;
+    update();
 }
 
 void MainBody::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
+    p.setPen(QColor(80,80,80));
+    p.setFont(QFont("Comic Sans MS",26,2));
+    QString words;
+    switch( my_turn)
+    {
+        case 0:words="Someone is not ready";break;
+        case 1:words="your turn";break;
+        case 2:words="your opponent's turn";
+    }
+    p.drawText(l_cell,l_cell-10,words);
+
     p.setPen(Qt::black);
-    p.setBrush(Qt::gray);
+    p.setBrush(Qt::lightGray);
     for(int i=1;i<=14;++i)
         for(int j=1;j<=14;++j)
             p.drawRect(l_cell*i+1,l_cell*j+1,l_cell,l_cell);
@@ -77,8 +97,9 @@ void MainBody::paintEvent(QPaintEvent *event)
     for(int i=1;i<=15;++i)
         for(int j=1;j<=15;++j)
             if(status[i][j])
-            {
-                p.setPen
+            { 
+                QPixmap pic(status[i][j]==1?"pic/black.png":"pic/white3.png");
+                p.drawPixmap(l_cell*i - l_cell*5/12 +1,l_cell*j - l_cell*5/12 +1,l_cell*5/6,l_cell*5/6,pic,0,0,0,0);
             }
 
 
@@ -93,15 +114,18 @@ void MainBody::mouseReleaseEvent(QMouseEvent *event)
         y = event->pos().y();
         i = (x + l_cell/2) / l_cell ;
         j = (y + l_cell/2) / l_cell;
-        if(abs(i * l_cell - x) < l_cell/4  && abs(j * -l_cell - y) < l_cell/4)
+        qDebug() << x << y << i <<j  <<endl;
+        if(abs(i * l_cell - x) < l_cell/4  && abs(j * l_cell - y) < l_cell/4)
             if(status[i][j] == 0)
             {
+                qDebug() << i << j <<endl;
                 status[i][j] = 2 - is_black;
                 data[0] = (char)i;data[1]=(char)j;
-                my_turn=2;
                 socket->write(data,2);
+                my_turn=2;
             }
     }
     else
-        QMessageBox::about(this,"please wait a moment","Not now!.");
+        QMessageBox::about(this,"please wait","___Not now!___");
+    update();
 }
