@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
     MainBody mainbody;
     QObject::connect(&begin ,SIGNAL(start_game(bool,QTcpSocket*)),
                      &mainbody,SLOT(game_start(bool,QTcpSocket*)));
+    QObject::connect(&mainbody,SIGNAL(game_over(bool)),
+                     &begin,SLOT(status_init(bool)));
 
 
     return a.exec();

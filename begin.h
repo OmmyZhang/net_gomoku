@@ -17,6 +17,8 @@ public:
     explicit Begin(QWidget *parent = 0);
     ~Begin();
 
+public slots:
+        void status_init(bool);
 private slots:
     void on_sw_toggled(bool);
     void on_send_clicked();
@@ -28,7 +30,6 @@ signals:
 
 private:
     Ui::Begin *ui;
-    void status_init(bool);
 
     QTcpSocket* socket;
     QTcpServer* server;

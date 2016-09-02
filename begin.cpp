@@ -9,20 +9,33 @@ Begin::Begin(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->sw->setDisabledColor(Qt::red);
+    
     socket = new QTcpSocket;
+    server = new QTcpServer;
+
     status_init(0);
 }
 
 void Begin::status_init(bool last_time_is_server)
 {
+    qDebug() << " Is server?" << last_time_is_server <<endl;
+/*    
     if(last_time_is_server)
-        delete server;
+        server->close();
     else
-        delete socket;
+        socket->disconnectFromHost();
+*/
 
+    delete socket;
+    delete server;
+    socket = new QTcpSocket;
+    server = new QTcpServer;
+
+    connect(server,SIGNAL(newConnection()),this,SLOT(server_ready()));
+    connect(socket,SIGNAL(connected()),this,SLOT(socket_ready()));
+    
     show();
     ui->sw->setToggle(false);
-    server = new QTcpServer;
     on_sw_toggled(false);
 
     ui->local_ip->setText(QString("Local IP : \n     IPv4: ") + QNetworkInterface::allAddresses()[2].toString()
@@ -31,6 +44,8 @@ void Begin::status_init(bool last_time_is_server)
 
 Begin::~Begin()
 {
+    delete socket;
+    delete server;
     delete ui;
 }
 
@@ -42,10 +57,8 @@ void Begin::on_sw_toggled(bool server_mod)
         ui->ip->hide();
         ui->lineEdit->hide();
         ui->for_server->show();
-        delete socket;
-        server = new QTcpServer;
+        socket->disconnectFromHost();
         server->listen(QHostAddress::Any,9876);
-        connect(socket,SIGNAL(newConnection()),this,SLOT(server_ready()));
     }
     else
     {
@@ -53,9 +66,7 @@ void Begin::on_sw_toggled(bool server_mod)
         ui->ip->show();
         ui->lineEdit->show();
         ui->for_server->hide();
-        delete server;
-        socket = new QTcpSocket;
-        connect(socket,SIGNAL(connected()),this,SLOT(socket_ready()));
+        server->close();
     }
 }
 
@@ -66,12 +77,17 @@ void Begin::on_send_clicked()
 
 void Begin::socket_ready()
 {
+    qDebug() << "Socket ready" <<endl;
     hide();
     emit start_game(0,socket);
 }
 
 void Begin::server_ready()
 {
+    qDebug() << "Server ready" <<endl;
     hide();
-    emit start_game(1,server->nextPendingConnection());
+
+    QTcpSocket *tmp = server->nextPendingConnection();
+    server->close();
+    emit start_game(1,tmp);
 }
