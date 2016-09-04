@@ -30,10 +30,12 @@ private:
     int go_ahead(int i,int j,int go_ii,int go_jj,int col);
 
 signals:
-    void game_over(bool isServer);
+    void game_over();
 
 public slots:
     void game_start(bool isServer ,QTcpSocket* socket);
+private slots:
+    void dic();
     void win_or_lost(bool win); 
     void recv();
 };

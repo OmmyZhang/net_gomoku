@@ -18,7 +18,7 @@ public:
     ~Begin();
 
 public slots:
-        void status_init(bool);
+        void status_init();
 private slots:
     void on_sw_toggled(bool);
     void on_send_clicked();

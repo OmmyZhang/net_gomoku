@@ -61,7 +61,15 @@ void MainBody::recv()
         pre();
     }
 }
+void MainBody::dic()
+{
+    qDebug() << "befor_dis" << endl;
+    QMessageBox::warning(this,"!!","Disconnected!");
+    qDebug() << "dis" <<endl;
+    hide();
+    emit game_over();
 
+}
 void MainBody::game_start(bool isServer ,QTcpSocket* _socket)
 {
     for(int i=1;i<=15;++i)
@@ -71,6 +79,7 @@ void MainBody::game_start(bool isServer ,QTcpSocket* _socket)
     socket = _socket;
     is_server = isServer;
     connect(socket,SIGNAL(readyRead()),this,SLOT(recv()));
+    connect(socket,SIGNAL(disconnected()),this,SLOT(dic()));
     setWindowTitle(QString("Gomoku, you're ")+QString(is_server?"Server":"Client"));
     my_turn=0;
     QMessageBox::information(this,"Gomoku","Game is going to begin,are you ready?",QMessageBox::Yes);
@@ -197,11 +206,11 @@ int MainBody::go_ahead(int i,int j,int go_ii,int go_jj,int col)
 
 void MainBody::win_or_lost(bool win)
 {
+    disconnect(socket,SIGNAL(disconnected()),this,SLOT(dic()));
     if(win)
         QMessageBox::about(this,"Congratulations","_____You win!_______");
     else
         QMessageBox::about(this,"Sad story","_____You lose!_______");
     hide();
-    disconnect(socket,SIGNAL(readyRead()),this,SLOT(recv()));
-    emit game_over(is_server);
+    emit game_over();
 }

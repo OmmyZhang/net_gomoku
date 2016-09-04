@@ -13,33 +13,36 @@ Begin::Begin(QWidget *parent) :
     socket = new QTcpSocket;
     server = new QTcpServer;
 
-    status_init(0);
+    status_init();
 }
 
-void Begin::status_init(bool last_time_is_server)
+void Begin::status_init()
 {
-    qDebug() << " Is server?" << last_time_is_server <<endl;
 /*    
     if(last_time_is_server)
         server->close();
     else
         socket->disconnectFromHost();
 */
+    qDebug() << "going to delete" <<endl;
 
     delete socket;
-    delete server;
+//    delete server;
+    qDebug() << "finish delete" <<endl;
     socket = new QTcpSocket;
     server = new QTcpServer;
+    qDebug() <<"finish new" <<endl;
 
     connect(server,SIGNAL(newConnection()),this,SLOT(server_ready()));
     connect(socket,SIGNAL(connected()),this,SLOT(socket_ready()));
-    
+    qDebug() << "finish connect" <<endl; 
     show();
     ui->sw->setToggle(false);
     on_sw_toggled(false);
 
     ui->local_ip->setText(QString("Local IP : \n     IPv4: ") + QNetworkInterface::allAddresses()[2].toString()
             +QString("\n     IPV6: ") + QNetworkInterface::allAddresses()[3].toString());
+    qDebug() << "finish init" <<endl;
 }
 
 Begin::~Begin()
